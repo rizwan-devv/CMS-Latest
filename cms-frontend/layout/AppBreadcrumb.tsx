@@ -3,7 +3,7 @@
 import React from 'react';
 import { usePathname } from 'next/navigation';
 import { BreadCrumb } from 'primereact/breadcrumb';
-import { ROUTES } from '@/lib/constants';
+import { ROUTES, withTrailingSlash } from '@/lib/constants';
 
 const SEGMENT_LABELS: Record<string, string> = {
   security: 'Security',
@@ -68,7 +68,7 @@ export default function AppBreadcrumb() {
     const isRealPage = PAGE_PATHS.has(normalizePath(href));
     return {
       label,
-      ...(!isLast && isRealPage ? { url: href } : {}),
+      ...(!isLast && isRealPage ? { url: withTrailingSlash(href) } : {}),
     };
   });
 

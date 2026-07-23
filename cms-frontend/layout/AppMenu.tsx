@@ -4,6 +4,7 @@ import React from 'react';
 import AppMenuitem from './AppMenuitem';
 import { MenuProvider } from './context/menucontext';
 import { menuItems } from '@/lib/menuConfig';
+import { withTrailingSlash } from '@/lib/constants';
 import { useAuth } from '@/services/auth/AuthContext';
 import type { AppMenuItem } from '@/types';
 import type { MenuResponse } from '@/types/menu';
@@ -29,8 +30,8 @@ function toAppMenuItems(menus: MenuResponse[]): AppMenuItem[] {
         return {
             label: menu.menuName,
             icon: normalizeIcon(menu.menuIcon),
-            // Categories are section headers (no navigation); leaves keep their path
-            to: category ? undefined : menu.menuPath,
+            // Categories are section headers; leaves need trailing slash (next trailingSlash: true)
+            to: category ? undefined : withTrailingSlash(menu.menuPath),
             items: hasChildren ? toAppMenuItems(menu.children!) : undefined,
         };
     });
