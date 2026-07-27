@@ -1,7 +1,6 @@
 'use client';
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { initApiClient, clearStoredToken, getStoredToken } from '@/services/api/client';
 import { AuthService } from '@/services/auth/AuthService';
 import { ROUTES } from '@/lib/constants';
@@ -39,7 +38,6 @@ const IDLE_TIMEOUT_MS = 15 * 60 * 1000;
 const IDLE_EVENTS: (keyof WindowEventMap)[] = ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart', 'click'];
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
   const [user, setUser] = useState<AuthUser | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [hasToken, setHasToken] = useState(false);
@@ -52,8 +50,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     clearStoredMenus();
     setUser(null);
     setHasToken(false);
-    router.push(ROUTES.login);
-  }, [router]);
+    // Full navigation — avoids Next client-router 404 with static export
+    window.location.assign(ROUTES.login);
+  }, []);
 
   useEffect(() => {
     initApiClient(onUnauthorized);
@@ -95,13 +94,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           menus,
         });
         setHasToken(true);
-        router.push(ROUTES.home);
+        window.location.assign(ROUTES.home);
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Login failed');
         throw e;
       }
     },
-    [router]
+    []
   );
 
   const logout = useCallback(() => {
@@ -110,8 +109,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     setHasToken(false);
     setError(null);
-    router.push(ROUTES.login);
-  }, [router]);
+    window.location.assign(ROUTES.login);
+  }, []);
 
   // Idle logout: no user activity for 15 minutes → clear session
   useEffect(() => {

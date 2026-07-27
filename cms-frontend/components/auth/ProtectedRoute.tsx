@@ -1,29 +1,29 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useAuth } from '@/services/auth/AuthContext';
 import { ROUTES } from '@/lib/constants';
 
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, initialized, hasAccess } = useAuth();
-  const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
     if (!initialized) return;
     if (!isAuthenticated) {
-      router.replace(ROUTES.login);
+      // Full navigation — Next client router breaks with output:'export' + trailingSlash
+      window.location.replace(ROUTES.login);
       return;
     }
     // Normalize trailing slash (next.config trailingSlash: true) so home "/" still bypasses RBAC.
     const normalizedPath = pathname === '/' ? '/' : (pathname || '/').replace(/\/+$/, '');
-    const bypassPaths = [ROUTES.home, ROUTES.unauthorized, '/unauthorized'];
+    const bypassPaths = [ROUTES.home, ROUTES.unauthorized, '/unauthorized', '/unauthorized/'];
     if (!bypassPaths.includes(normalizedPath as any) && !hasAccess(normalizedPath)) {
-      router.replace(ROUTES.unauthorized);
+      window.location.replace(ROUTES.unauthorized);
     }
-  }, [initialized, isAuthenticated, router, pathname, hasAccess]);
+  }, [initialized, isAuthenticated, pathname, hasAccess]);
 
   if (!initialized || !isAuthenticated) {
     return (

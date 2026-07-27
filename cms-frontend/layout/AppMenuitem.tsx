@@ -1,5 +1,4 @@
 'use client';
-import Link from 'next/link';
 import { Ripple } from 'primereact/ripple';
 import { classNames } from 'primereact/utils';
 import React, { useEffect, useContext } from 'react';
@@ -7,6 +6,7 @@ import { CSSTransition } from 'react-transition-group';
 import { MenuContext } from './context/menucontext';
 import { AppMenuItemProps } from '@/types';
 import { usePathname, useSearchParams } from 'next/navigation';
+import { withTrailingSlash } from '@/lib/constants';
 
 const AppMenuitem = (props: AppMenuItemProps) => {
     const pathname = usePathname();
@@ -59,6 +59,9 @@ const AppMenuitem = (props: AppMenuItemProps) => {
         </CSSTransition>
     );
 
+    // Full page navigation: Next <Link> client routing breaks with output:'export' + trailingSlash
+    const href = item!.to ? withTrailingSlash(item!.to) ?? item!.to : undefined;
+
     return (
         <li className={classNames({ 'layout-root-menuitem': props.root, 'active-menuitem': active })}>
             {/* Root category title (Sakai hides > a on root via CSS) */}
@@ -73,11 +76,17 @@ const AppMenuitem = (props: AppMenuItemProps) => {
             ) : null}
 
             {item!.to && !item!.items && item!.visible !== false ? (
-                <Link href={item!.to} replace={item!.replaceUrl} target={item!.target} onClick={(e) => itemClick(e)} className={classNames(item!.class, 'p-ripple', { 'active-route': isActiveRoute })} tabIndex={0}>
+                <a
+                    href={href}
+                    onClick={(e) => itemClick(e)}
+                    className={classNames(item!.class, 'p-ripple', { 'active-route': isActiveRoute })}
+                    tabIndex={0}
+                    target={item!.target}
+                >
                     <i className={classNames('layout-menuitem-icon', item!.icon)}></i>
                     <span className="layout-menuitem-text">{item!.label}</span>
                     <Ripple />
-                </Link>
+                </a>
             ) : null}
 
             {subMenu}
