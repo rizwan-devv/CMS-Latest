@@ -10,10 +10,11 @@ target/
 *.iml
 .vscode/
 
-# Logs and generated export files
+# Logs and generated bureau export files (runtime output dir only)
 *.log
-export/
-**/export/
+/export/
+core-service/export/
+# Do NOT ignore Next.js route: cms-frontend/app/(main)/operations/cards/export/
 
 # Environment / secrets
 .env
