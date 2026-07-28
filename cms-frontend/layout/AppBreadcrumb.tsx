@@ -14,6 +14,7 @@ const SEGMENT_LABELS: Record<string, string> = {
   'audit-logs': 'Audit logs',
   operations: 'Operations',
   cards: 'Cards',
+  detail: 'Card details',
   export: 'Card export',
   expiry: 'Expiry search',
   'change-type': 'Change card type',

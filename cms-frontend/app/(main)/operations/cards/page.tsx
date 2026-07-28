@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useCallback, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
 import { DataTable, type DataTableStateEvent } from 'primereact/datatable';
@@ -13,9 +12,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as CardService from '@/services/cards/CardService';
 import { AppDialog, FormSection, FormField } from '@/components/ui';
 import type { Card, CardSearchRequest } from '@/types/card';
+import { ROUTES, cardDetailHref } from '@/lib/constants';
 
 export default function CardsPage() {
-  const router = useRouter();
   const toast = React.useRef<Toast>(null);
   const queryClient = useQueryClient();
   const [search, setSearch] = useState<CardSearchRequest>({ page: 0, size: 10, sort: 'createdOn', sortDir: 'desc' });
@@ -86,7 +85,7 @@ export default function CardsPage() {
         rounded
         size="small"
         className={`p-button-text card-view-${row.cardId}`}
-        onClick={() => router.push(`/operations/cards/${row.cardId}`)}
+        onClick={() => window.location.assign(cardDetailHref(row.cardId, ROUTES.cards))}
       />
       <Tooltip target={`.card-lp-${row.cardId}`} content="Set limit profile" position="top" />
       <Button

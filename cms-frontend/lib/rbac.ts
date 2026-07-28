@@ -54,7 +54,7 @@ export function hasMenuAccess(path: string, menus?: MenuResponse[]): boolean {
   const source = menus ?? getStoredMenus();
   const allowedPaths = flattenPaths(source).map(normalizePath);
   if (allowedPaths.includes(target)) return true;
-  // Child of an allowed menu (e.g. /operations/cards/123 under /operations/cards)
+  // Child of an allowed menu (e.g. /operations/cards/detail under /operations/cards)
   if (allowedPaths.some((allowed) => allowed !== '/' && target.startsWith(`${allowed}/`))) {
     return true;
   }

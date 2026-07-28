@@ -20,7 +20,7 @@ export function withTrailingSlash(path?: string | null): string | undefined {
 /** Query param name for card detail “Back” target (internal path only). */
 export const CARD_RETURN_FROM_PARAM = 'from';
 
-/** Safe path for router after reading `from` query param (open redirect safe). */
+/** Safe path for navigation after reading `from` query param (open redirect safe). */
 export function safeReturnPath(from: string | null | undefined, fallback = '/operations/cards/'): string {
   if (from == null || from === '') return fallback;
   const t = from.trim();
@@ -48,6 +48,7 @@ export const ROUTES = {
   cardTypes: '/housekeeping/card-types/',
   auditLogs: '/security/audit-logs/',
   cards: '/operations/cards/',
+  cardDetail: '/operations/cards/detail/',
   cardsExpiry: '/operations/cards/expiry/',
   cardsChangeType: '/operations/cards/change-type/',
   cardsReplacement: '/operations/cards/replacement-request/',
@@ -59,3 +60,10 @@ export const ROUTES = {
   cardRequestSearch: '/card-production/requests/search/',
   cardGeneration: '/card-production/generation/',
 } as const;
+
+/** Static-export-safe card detail URL (query id, not dynamic path segment). */
+export function cardDetailHref(cardId: number | string, from?: string | null): string {
+  const base = `${ROUTES.cardDetail}?id=${encodeURIComponent(String(cardId))}`;
+  if (from == null || from === '') return base;
+  return `${base}&${CARD_RETURN_FROM_PARAM}=${encodeURIComponent(from)}`;
+}

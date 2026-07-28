@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Button } from 'primereact/button';
 import { Calendar } from 'primereact/calendar';
 import { Column } from 'primereact/column';
@@ -13,6 +12,7 @@ import { useMutation } from '@tanstack/react-query';
 import * as CardService from '@/services/cards/CardService';
 import { FormSection, FormField } from '@/components/ui';
 import type { Card } from '@/types/card';
+import { ROUTES, cardDetailHref } from '@/lib/constants';
 
 function formatLocalDate(d: Date): string {
   const y = d.getFullYear();
@@ -28,7 +28,6 @@ function isHotCard(card: Card): boolean {
 }
 
 export default function CardsExpirySearchPage() {
-  const router = useRouter();
   const toast = React.useRef<Toast>(null);
   const [dateFrom, setDateFrom] = useState<Date | null>(null);
   const [dateTo, setDateTo] = useState<Date | null>(null);
@@ -138,7 +137,7 @@ export default function CardsExpirySearchPage() {
           rounded
           size="small"
           className={`p-button-text expiry-view-${row.cardId}`}
-          onClick={() => router.push(`/operations/cards/${row.cardId}`)}
+          onClick={() => window.location.assign(cardDetailHref(row.cardId, ROUTES.cardsExpiry))}
         />
         <Tooltip target={`.expiry-renew-${row.cardId}`} content="Renew card (+5 years expiry)" position="top" />
         <Button
@@ -166,7 +165,7 @@ export default function CardsExpirySearchPage() {
         />
       </div>;
     },
-    [renewMutation, replaceMutation, router, searchMutation.isPending]
+    [renewMutation, replaceMutation, searchMutation.isPending]
   );
 
   const emptyTemplate = useMemo(
