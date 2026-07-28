@@ -9,6 +9,14 @@ import { useAuth } from '@/services/auth/AuthContext';
 import type { AppMenuItem } from '@/types';
 import type { MenuResponse } from '@/types/menu';
 
+/** Ordered category rules — first match wins */
+const CATEGORY_RULES: { prefix: string; label: string }[] = [
+    { prefix: '/security', label: 'Security' },
+    { prefix: '/operations', label: 'Operations' },
+    { prefix: '/card-production', label: 'Card Production' },
+    { prefix: '/housekeeping', label: 'Housekeeping' },
+];
+
 function normalizeIcon(icon?: string | null): string {
     if (!icon || !icon.trim()) return 'pi pi-fw pi-circle';
     const value = icon.trim();
@@ -17,35 +25,71 @@ function normalizeIcon(icon?: string | null): string {
     return `pi pi-fw ${value}`;
 }
 
-function isCategoryPath(path?: string | null): boolean {
+function isCategoryOnly(path?: string | null): boolean {
     if (!path || !path.trim()) return true;
     const p = path.trim();
     return p === '#' || p.startsWith('#');
 }
 
+/** Flatten tree from API into a single list of navigable leaves */
+function flattenMenus(menus: MenuResponse[]): MenuResponse[] {
+    const out: MenuResponse[] = [];
+    const walk = (nodes: MenuResponse[]) => {
+        for (const n of nodes) {
+            if (Array.isArray(n.children) && n.children.length > 0) {
+                walk(n.children);
+            } else if (!isCategoryOnly(n.menuPath)) {
+                out.push(n);
+            }
+        }
+    };
+    walk(menus);
+    return out;
+}
+
+function categoryForPath(path?: string | null): string {
+    if (!path || !path.trim() || path.trim() === '/') return 'Home';
+    const p = path.trim().replace(/\/+$/, '') || '/';
+    if (p === '/') return 'Home';
+    for (const rule of CATEGORY_RULES) {
+        if (p === rule.prefix || p.startsWith(rule.prefix + '/')) {
+            return rule.label;
+        }
+    }
+    return 'Other';
+}
+
 function toAppMenuItems(menus: MenuResponse[]): AppMenuItem[] {
-    const mapped: AppMenuItem[] = menus.map((menu) => {
-        const hasChildren = Array.isArray(menu.children) && menu.children.length > 0;
-        const category = hasChildren || isCategoryPath(menu.menuPath);
-        return {
+    const leaves = flattenMenus(menus);
+
+    const order = ['Home', ...CATEGORY_RULES.map((r) => r.label), 'Other'];
+    const buckets = new Map<string, AppMenuItem[]>();
+
+    for (const menu of leaves) {
+        const cat = categoryForPath(menu.menuPath);
+        const item: AppMenuItem = {
             label: menu.menuName,
             icon: normalizeIcon(menu.menuIcon),
-            // Categories are section headers; leaves need trailing slash (next trailingSlash: true)
-            to: category ? undefined : withTrailingSlash(menu.menuPath),
-            items: hasChildren ? toAppMenuItems(menu.children!) : undefined,
+            to: withTrailingSlash(menu.menuPath),
         };
-    });
-
-    // Sakai root items must be sections with children. Wrap orphan leaves so they stay visible.
-    const rootsWithChildren = mapped.filter((m) => m.items && m.items.length > 0);
-    const rootLeaves = mapped.filter((m) => !m.items || m.items.length === 0);
-    if (rootLeaves.length > 0) {
-        rootsWithChildren.unshift({
-            label: 'Menu',
-            items: rootLeaves,
-        });
+        const list = buckets.get(cat) ?? [];
+        list.push(item);
+        buckets.set(cat, list);
     }
-    return rootsWithChildren;
+
+    const result: AppMenuItem[] = [];
+    for (const label of order) {
+        const items = buckets.get(label);
+        if (items && items.length > 0) {
+            result.push({ label, items });
+        }
+    }
+    Array.from(buckets.entries()).forEach(([label, items]) => {
+        if (!order.includes(label) && items.length > 0) {
+            result.push({ label, items });
+        }
+    });
+    return result;
 }
 
 const AppMenu = () => {

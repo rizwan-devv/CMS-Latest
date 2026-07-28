@@ -4,14 +4,14 @@
 
 import Link from 'next/link';
 import { classNames } from 'primereact/utils';
-import React, { forwardRef, useContext, useImperativeHandle, useRef } from 'react';
+import React, { forwardRef, useContext, useImperativeHandle, useMemo, useRef } from 'react';
 import { AppTopbarRef } from '@/types';
 import { LayoutContext } from './context/layoutcontext';
 import { useAuth } from '@/services/auth/AuthContext';
 
 const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
     const { layoutConfig, layoutState, onMenuToggle, showProfileSidebar } = useContext(LayoutContext);
-    const { logout } = useAuth();
+    const { user, logout } = useAuth();
     const menubuttonRef = useRef(null);
     const topbarmenuRef = useRef(null);
     const topbarmenubuttonRef = useRef(null);
@@ -21,6 +21,21 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
         topbarmenu: topbarmenuRef.current,
         topbarmenubutton: topbarmenubuttonRef.current
     }));
+
+    const displayName = useMemo(() => {
+        if (!user) return null;
+        const name = user.fullName?.trim();
+        return name || user.loginId || null;
+    }, [user]);
+
+    const roleLabel = useMemo(() => {
+        if (!user?.roles?.length) return null;
+        return user.roles.join(', ');
+    }, [user]);
+
+    const handleLogout = () => {
+        logout();
+    };
 
     return (
         <div className="layout-topbar">
@@ -43,8 +58,29 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
             </button>
 
             <div ref={topbarmenuRef} className={classNames('layout-topbar-menu', { 'layout-topbar-menu-mobile-active': layoutState.profileSidebarVisible })}>
-                <button type="button" className="p-link layout-topbar-button" onClick={() => logout()} aria-label="Log out">
-                    <i className="pi pi-sign-out"></i>
+                {displayName && (
+                    <div className="layout-topbar-user" title={roleLabel ? `${displayName} · ${roleLabel}` : displayName}>
+                        <div className="layout-topbar-user-avatar" aria-hidden>
+                            <i className="pi pi-user" />
+                        </div>
+                        <div className="layout-topbar-user-text">
+                            <span className="layout-topbar-user-name">{displayName}</span>
+                            {roleLabel ? (
+                                <span className="layout-topbar-user-role">{roleLabel}</span>
+                            ) : user?.loginId && user.fullName?.trim() ? (
+                                <span className="layout-topbar-user-role">{user.loginId}</span>
+                            ) : null}
+                        </div>
+                    </div>
+                )}
+
+                <button
+                    type="button"
+                    className="p-link layout-topbar-button layout-topbar-logout"
+                    onClick={handleLogout}
+                    aria-label="Log out"
+                >
+                    <i className="pi pi-sign-out" />
                     <span>Logout</span>
                 </button>
             </div>

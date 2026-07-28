@@ -138,11 +138,9 @@ export default function NewCardRequestPage() {
 
   const branchOptions = dropdowns.branches?.map((b) => ({ label: b.branchName, value: b.id })) ?? [];
   const productOptions = dropdowns.cardProducts?.map((p) => ({ label: p.name, value: p.id })) ?? [];
-  const selectedProductId = form.productId ?? null;
+  // Shared card types: same codes available for every product (no per-product filter)
   const typeOptions =
-    dropdowns.cardTypes
-      ?.filter((t) => selectedProductId == null || t.productCode === dropdowns.cardProducts?.find((p) => p.id === selectedProductId)?.code)
-      ?.map((t) => ({ label: t.name, value: t.id })) ?? [];
+    dropdowns.cardTypes?.map((t) => ({ label: `${t.name ?? t.code} (${t.code})`, value: t.id })) ?? [];
   const accountOptions = accounts.map((a) => ({
     label: `${a.accountNum} ${a.accountTitle ?? ''}`.trim(),
     value: a.accountNum,
@@ -338,7 +336,6 @@ export default function NewCardRequestPage() {
                   setForm((f) => ({
                     ...f,
                     productId: e.value ?? null,
-                    cardTypeId: null,
                   }))
                 }
                 placeholder="Select product"
@@ -353,9 +350,8 @@ export default function NewCardRequestPage() {
                 value={form.cardTypeId}
                 options={typeOptions}
                 onChange={(e) => setForm((f) => ({ ...f, cardTypeId: e.value ?? null }))}
-                placeholder={form.productId != null ? 'Select type' : 'Select product first'}
+                placeholder="Select type"
                 className="w-full"
-                disabled={form.productId == null}
               />
             </FormField>
           </div>

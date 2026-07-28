@@ -1,7 +1,4 @@
-import React, { ReactElement, Dispatch, SetStateAction, HTMLAttributeAnchorTarget, ReactNode } from 'react';
-import { NextPage } from 'next';
-import { Demo } from './demo';
-import { Toast } from 'primereact/toast';
+import React, { Dispatch, SetStateAction, HTMLAttributeAnchorTarget, ReactNode, MutableRefObject } from 'react';
 
 /* Breadcrumb Types */
 export interface AppBreadcrumbProps {
@@ -68,7 +65,7 @@ export interface AppTopbarRef {
 /* AppMenu Types */
 type CommandProps = {
     originalEvent: React.MouseEvent<HTMLAnchorElement, MouseEvent>;
-    item: MenuModelItem;
+    item: AppMenuItem;
 };
 
 export interface MenuProps {

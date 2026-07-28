@@ -1,0 +1,28 @@
+# Maven build output
+target/
+**/target/
+*.jar
+*.war
+*.class
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Logs and generated export files
+*.log
+export/
+**/export/
+
+# Environment / secrets
+.env
+.env.local
+.env.production
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local backups (never commit)
+*.bak
